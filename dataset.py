@@ -60,6 +60,7 @@ class Dataset:
 			print(file_name+str(i))
 			
 			cv2.imshow("frame", frame)
+		self.from_image(file_name)
 
 	def from_image(self, folder_name):
 		#extract only faces of all the images
@@ -68,31 +69,22 @@ class Dataset:
 		face_cascade = cv2.CascadeClassifier("haarcascade_frontal_face_default.xml")
 		if not os.path.exists(path0+"FACES"):
 			os.mkdir(path0+"FACES")
-		if not os.path.exists(path+"FACES/"+folder_name):
-			os.mkdir(path0+"FACES/"+folder_name)
-		for image in os.listdir(path):
-			i = 0
-			img = cv2.imread(path+"/"+image, 0)
-			faces = face_cascade.detectMultiScale(img, 1.1, 5)
-			for x, y, w, h in faces:
-				roi = img[y:y+h, x:x+h]
-				cv2.imwrite(path0+"FACES/"+folder_name+"/face"+str(i)+".jpg", roi)
-				i += 1
-
-			#show_thread = t.Thread(target=self.show_image, args=(img, faces))
-			#show_thread.start()
-		#save in name_faces folder
 		
-'''
-	def show_image(self, image , faces):
-		while True:
-			for x, y, w, h in faces:
-				cv2.rectangle(image, (x,y), (x+w, y+h), (0,255,0),2)
-			key = cv2.waitKey(1)
-			if key == ord('q'):
-				break
-			cv2.imshow("image", image)
-'''
+		if not os.path.exists(path0+"FACES/"+folder_name):
+			os.mkdir(path0+"FACES/"+folder_name)
+		i=0
+		for image in os.listdir(path):
+			img = cv2.imread(path+"/"+image)
+			faces = face_cascade.detectMultiScale(img, 1.1, 5)
+			print(faces)
+
+			if len(faces):
+				for x, y, w, h in faces:
+					roi = img[y:y+h, x:x+h]
+					cv2.imwrite(path0+"FACES/"+folder_name+"/face"+str(i)+".jpg", roi)
+					i += 1
+		print('face extracting done for ', folder_name)
+ 
 
 if __name__ == '__main__':
 	d = Dataset()
