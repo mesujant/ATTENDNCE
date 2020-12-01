@@ -98,8 +98,10 @@ class Dataset:
 		for person in persons_name:
 			face_images = os.listdir(self.faces_images_path +"/"+person)
 			for face in face_images:
-				read_face = cv2.imread(self.faces_images_path+"/"+person+"/"+face , 0)	
+				read_face = cv2.imread(self.faces_images_path+"/"+person+"/"+face )	
 				read_face = cv2.resize(read_face , (28, 28) , cv2.INTER_AREA)
+				#print(read_face.shape)
+				#input()
 				faces.append(read_face)
 				labels.append(persons_name.index(person))
 			 
