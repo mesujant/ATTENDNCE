@@ -1,11 +1,14 @@
 import cv2
 import os 
-import threading as t
+import random
+import numpy as np 
+#import threading as t
 
 class Dataset:
 	def __init__(self):
-		pass
-
+		self.faces_images_path = "/home/synced/Desktop/JUST_PYTHON/AI/ATTENDNCE/IMAGES/FACES/"
+		self.faces = []
+		self.faces_labels = []
 	def from_webcam(self, person):
 		if not os.path.exists("VIDEOS"):
 			os.mkdir("VIDEOS")
@@ -72,22 +75,57 @@ class Dataset:
 		
 		if not os.path.exists(path0+"FACES/"+folder_name):
 			os.mkdir(path0+"FACES/"+folder_name)
+			self.faces_images_path = path0 + "FACES/"
+
 		i=0
 		for image in os.listdir(path):
 			img = cv2.imread(path+"/"+image)
 			faces = face_cascade.detectMultiScale(img, 1.1, 5)
-			print(faces)
+			#print(faces)
 
 			if len(faces):
 				for x, y, w, h in faces:
-					roi = img[y:y+h, x:x+h]
+					roi = img[y:y+h, x:x+w]
 					cv2.imwrite(path0+"FACES/"+folder_name+"/face"+str(i)+".jpg", roi)
 					i += 1
 		print('face extracting done for ', folder_name)
  
 
+	def load_faces_images(self):
+		persons_name = os.listdir(self.faces_images_path)
+		faces = []
+		labels = []
+		for person in persons_name:
+			face_images = os.listdir(self.faces_images_path +"/"+person)
+			for face in face_images:
+				read_face = cv2.imread(self.faces_images_path+"/"+person+"/"+face , 0)	
+				read_face = cv2.resize(read_face , (28, 28) , cv2.INTER_AREA)
+				faces.append(read_face)
+				labels.append(persons_name.index(person))
+			 
+		
+		#generating more than 70% random data for trainning 
+		#around 30% for testing
+		train_index = {}
+		while len(train_index) < int(0.7*len(faces)):
+			train_index = {random.randint(0 , len(faces)-1) for i in range(len(faces))}
+		#print(faces[0])
+		test_index = {i for i in range(len(faces)) if i not in train_index}
+		
+		faces_train = [(faces[index]) for index in train_index]
+		faces_test = [(faces[index]) for index in test_index]
+
+		labels_train = [labels[index] for index in train_index]
+		labels_test = [labels[index] for index in test_index]
+		return (np.asarray(faces_train) , np.asarray(labels_train) , np.asarray(faces_test) , np.asarray(labels_test))
+		
+			
+		
+
 if __name__ == '__main__':
 	d = Dataset()
-	#d.from_webcam("sujan")
-	#d.from_video('sujan.mp4')
-	d.from_image("sujan")
+	(a1 , b1) , (a2 , b2)= d.load_faces_images()
+	print("train data:" , a1 , b1)
+	print("************************")
+	print("test data:" , a2 , b2)
+	#train_no = int(len(faces) * 0.7)
