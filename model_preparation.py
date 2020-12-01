@@ -3,6 +3,9 @@ from tensorflow import keras
 from tensorflow.keras import models, layers
 #from keras.datasets import mnist
 from dataset import Dataset
+from keras.layers import Conv2D, MaxPool2D, Flatten, Dense, InputLayer, Dropout, BatchNormalization
+from keras.models import Sequential
+
 
 '''
 class Dataset:
@@ -42,17 +45,35 @@ class ModelPreparation:
 		self.x_valid = self.x_valid / 255.
 		self.y_valid = y_test[:test_no]
 
+	def create_network(self):
+		self.model = Sequential()
+		self.model.add(InputLayer(input_shape=(28,28,3)))
 
-	#def create_network(self):
-		self.model = models.Sequential([keras.layers.Flatten(input_shape=[28,28]), 
-			keras.layers.Dense(784, activation="relu"), keras.layers.Dense(300, activation="relu"),
-			keras.layers.Dense(100, activation="relu"), 
-			keras.layers.Dense(3, activation="softmax")])
-	#	return network
-		
+		self.model.add(Conv2D(25, (5, 5), activation="relu"))
+		self.model.add(MaxPool2D((2,2)))
+
+		self.model.add(Conv2D(25, (3,3), activation="relu"))
+		self.model.add(MaxPool2D((2,2)))
+		self.model.add(BatchNormalization())
+
+		self.model.add(Conv2D(70, (3,3), activation="relu"))
+		self.model.add(MaxPool2D((2,2)))
+		self.model.add(BatchNormalization())
+
+		self.model.add(Flatten())
+		self.model.add(Dense(100, activation="relu"))
+		self.model.add(Dense(50, activation="relu"))
+		self.model.add(Dropout(0.25))
+
+		self.model.add(Dense(3, activation="softmax"))
+		print(self.model.summary())
+		input()
+	 
 	def start_trainning(self):
+	#def start_trainning(self):
 		#model = self.create_network()
 		#print(network.summary())
+		self.create_network()
 		self.model.compile(loss="sparse_categorical_crossentropy", 
 						optimizer="sgd", 
 						metrics=["accuracy"])
@@ -63,7 +84,7 @@ class ModelPreparation:
 
 	def return_model(self):
 		self.start_trainning()
-		self.model.save('test_1.hd5')
+		self.model.save('test_2.hd5')
 		return self.model
 
 	def evaluate_mode(self):
@@ -77,7 +98,6 @@ class ModelPreparation:
 if __name__ == '__main__':
 	#x_train , y_train , x_test , y_test = d.return_data()
 	d= Dataset()
-	print(dir(d))
 	x_train, y_train, x_test, y_test = d.load_faces_images()
 	m = ModelPreparation(x_train , y_train , x_test , y_test)
 	#m.start_trainning()
